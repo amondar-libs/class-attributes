@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types = 1);
 
 namespace Tests\Unit;
 
@@ -19,28 +19,30 @@ use Tests\resources\classes\repeatable\simple\FirstClassWithAttribute;
 test('AttributesCache works as expected when adding new namespaces', function () {
     AttributesCache::addNamespace([
         'Tests\resources\classes' => AttributesLoader::new()
-                                                     ->add(
-                                                         ClassAttribute::class, ascend: true,
-                                                         customLoader: fn($attribute) => $attribute->someData,
-                                                     )
-                                                     ->add(
-                                                         ClassAttributeRepeatable::class,
-                                                         LoadType::RepeatableClass,
-                                                         true,
-                                                         fn(Collection $attributes) => $attributes->map->someData->collapse()
-                                                     )
-                                                     ->add(
-                                                         MethodAttribute::class, LoadType::Method,
-                                                         customLoader: fn(Collection $methods) => $methods->map(fn($method) => $method->first()->description),
-                                                     ),
+            ->add(
+                ClassAttribute::class,
+                ascend: true,
+                customLoader: fn($attribute) => $attribute->someData,
+            )
+            ->add(
+                ClassAttributeRepeatable::class,
+                LoadType::RepeatableClass,
+                true,
+                fn(Collection $attributes) => $attributes->map->someData->collapse()
+            )
+            ->add(
+                MethodAttribute::class,
+                LoadType::Method,
+                customLoader: fn(Collection $methods) => $methods->map(fn($method) => $method->first()->description),
+            ),
     ]);
 
     AttributesCache::load();
 
-    //dd(AttributesCache::get(FirstClassWithAttribute::class, ClassAttributeRepeatable::class));
+    // dd(AttributesCache::get(FirstClassWithAttribute::class, ClassAttributeRepeatable::class));
 
     expect(AttributesCache::get(FirstClassWithAttribute::class, ClassAttribute::class))
-        ->toMatchArray([ 'someData' => 'someValue', ])
+        ->toMatchArray([ 'someData' => 'someValue' ])
         ->and(AttributesCache::get(FirstClassWithAttribute::class, MethodAttribute::class))
         ->toMatchArray([
             'firstMethod'  => 'First method description',

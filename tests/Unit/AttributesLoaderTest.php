@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types = 1);
 
 namespace Tests\Unit;
 
@@ -16,8 +16,8 @@ use Tests\resources\classes\repeatable\simple\FirstClassWithAttribute;
 
 test('AttributesLoader works as expected', function () {
     $result = AttributesLoader::new()
-                              ->add(ClassAttribute::class, LoadType::SimpleClass)
-                              ->load(FirstClassWithAttribute::class);
+        ->add(ClassAttribute::class, LoadType::SimpleClass)
+        ->load(FirstClassWithAttribute::class);
 
     expect($result->toArray())->toMatchArray([
         ClassAttribute::class => new ClassAttribute([
@@ -26,8 +26,8 @@ test('AttributesLoader works as expected', function () {
     ]);
 
     $result = AttributesLoader::new()
-                              ->add(ClassAttribute::class, LoadType::SimpleClass, true)
-                              ->load(FirstClassChildWithoutAttribute::class);
+        ->add(ClassAttribute::class, LoadType::SimpleClass, true)
+        ->load(FirstClassChildWithoutAttribute::class);
 
     expect($result->toArray())->toMatchArray([
         ClassAttribute::class => new ClassAttribute([
@@ -36,8 +36,8 @@ test('AttributesLoader works as expected', function () {
     ]);
 
     $result = AttributesLoader::new()
-                              ->add(ClassAttributeRepeatable::class, LoadType::SimpleClass)
-                              ->load(FirstRepeatableClassWithAttribute::class);
+        ->add(ClassAttributeRepeatable::class, LoadType::SimpleClass)
+        ->load(FirstRepeatableClassWithAttribute::class);
 
     expect($result->toArray())->toMatchArray([
         ClassAttributeRepeatable::class => new ClassAttributeRepeatable([
@@ -46,8 +46,8 @@ test('AttributesLoader works as expected', function () {
     ]);
 
     $result = AttributesLoader::new()
-                              ->add(ClassAttributeRepeatable::class, LoadType::RepeatableClass)
-                              ->load(FirstRepeatableClassChildWithAttribute::class);
+        ->add(ClassAttributeRepeatable::class, LoadType::RepeatableClass)
+        ->load(FirstRepeatableClassChildWithAttribute::class);
 
     expect($result->map->toArray())->toMatchArray([
         ClassAttributeRepeatable::class => [
@@ -58,8 +58,8 @@ test('AttributesLoader works as expected', function () {
     ]);
 
     $result = AttributesLoader::new()
-                              ->add(ClassAttributeRepeatable::class, LoadType::RepeatableClass, true)
-                              ->load(FirstRepeatableClassChildWithAttribute::class);
+        ->add(ClassAttributeRepeatable::class, LoadType::RepeatableClass, true)
+        ->load(FirstRepeatableClassChildWithAttribute::class);
 
     expect($result->map->toArray())->toMatchArray([
         ClassAttributeRepeatable::class => [
@@ -76,19 +76,19 @@ test('AttributesLoader works as expected', function () {
     ]);
 
     $result = AttributesLoader::new()
-                              ->add(
-                                  ClassAttributeRepeatable::class,
-                                  LoadType::RepeatableClass,
-                                  true,
-                                  fn(Collection $attributes) => $attributes->map->someData->collapse()
-                              )
-                              ->load(FirstRepeatableClassChildWithAttribute::class);
+        ->add(
+            ClassAttributeRepeatable::class,
+            LoadType::RepeatableClass,
+            true,
+            fn(Collection $attributes) => $attributes->map->someData->collapse()
+        )
+        ->load(FirstRepeatableClassChildWithAttribute::class);
 
     expect($result->map->toArray())->toMatchArray([
         ClassAttributeRepeatable::class => [
             'someAnotherData1' => 'someAnotherValue1',
-            'someData' => 'someValue',
-            'someAnotherData' => 'someAnotherValue',
+            'someData'         => 'someValue',
+            'someAnotherData'  => 'someAnotherValue',
         ],
     ]);
 });

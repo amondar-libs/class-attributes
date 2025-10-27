@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types = 1);
 
 namespace Tests;
 
@@ -22,13 +22,12 @@ abstract class TestCase extends CoreTestCase
     }
 
     #[NoReturn]
-    protected function runInBenchmarking(Closure $closure) : void
+    protected function runInBenchmarking(Closure $closure): void
     {
         $start = microtime(true);
         $closure();
         $end = microtime(true);
 
-        dd(( $end - $start ) * 1000);
+        dd(($end - $start) * 1000);
     }
-
 }

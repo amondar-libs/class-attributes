@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Amondar\ClassAttributes\Contracts;
 
 /**
@@ -12,14 +14,11 @@ interface AttributesCacheContract
     /**
      * Adds one or more namespaces to the application configuration.
      *
-     * @param array<string, \Amondar\ClassAttributes\Libraries\AttributesLoader> $namespaces An associative array where
-     *                                                                                       the key is the namespace
-     *                                                                                       name and the value is the
-     *                                                                                       namespace path.
+     * @param  array<string, \Amondar\ClassAttributes\Libraries\AttributesLoader>  $namespaces  An associative array
+     *                                                                                          where the key is the namespace name
+     *                                                                                          and the value is the namespace path.
      */
-    public static function addNamespace(array $namespaces) : void;
+    public static function addNamespace(array $namespaces): void;
 
-
-    public function load() : void;
-
+    public function load(): void;
 }

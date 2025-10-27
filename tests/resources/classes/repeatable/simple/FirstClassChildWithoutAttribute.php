@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Tests\resources\classes\repeatable\simple;
 
 use Tests\resources\attributes\MethodAttribute;
@@ -11,11 +13,9 @@ use Tests\resources\attributes\MethodAttribute;
  */
 class FirstClassChildWithoutAttribute extends FirstClassWithAttribute
 {
-
-    #[MethodAttribute( 'Third method description' )]
+    #[MethodAttribute('Third method description')]
     public function thirdMethod()
     {
         //
     }
-
 }

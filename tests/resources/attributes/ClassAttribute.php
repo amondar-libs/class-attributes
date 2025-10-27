@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Tests\resources\attributes;
 
 use Attribute;
@@ -9,9 +11,9 @@ use Attribute;
  *
  * @author Amondar-SO
  */
-#[Attribute( Attribute::TARGET_CLASS )]
+#[Attribute(Attribute::TARGET_CLASS)]
 class ClassAttribute
 {
-    public function __construct(public array $someData) { }
+    public function __construct(public array $someData) {}
 
 }

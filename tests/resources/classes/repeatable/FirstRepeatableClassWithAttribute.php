@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Tests\resources\classes\repeatable;
 
 use Tests\resources\attributes\ClassAttributeRepeatable;
@@ -9,11 +11,10 @@ use Tests\resources\attributes\ClassAttributeRepeatable;
  *
  * @author Amondar-SO
  */
-#[ClassAttributeRepeatable( [ 'someData' => 'someValue' ])]
-#[ClassAttributeRepeatable( [ 'someAnotherData' => 'someAnotherValue' ])]
+#[ClassAttributeRepeatable([ 'someData' => 'someValue' ])]
+#[ClassAttributeRepeatable([ 'someAnotherData' => 'someAnotherValue' ])]
 class FirstRepeatableClassWithAttribute
 {
-
     /**
      * FirstRepeatableClassWithAttribute constructor.
      */
@@ -21,5 +22,4 @@ class FirstRepeatableClassWithAttribute
     {
         //
     }
-
 }

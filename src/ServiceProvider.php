@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types = 1);
 
 namespace Amondar\ClassAttributes;
 
@@ -21,13 +21,13 @@ final class ServiceProvider extends PackageServiceProvider
     /**
      * Configure package
      */
-    public function configurePackage(Package $package) : void
+    public function configurePackage(Package $package): void
     {
         $package
             ->name('php-attributes');
     }
 
-    public function packageBooted() : void
+    public function packageBooted(): void
     {
         Application::macro('getBinding', function (string $abstract) {
             $concrete = $this->bindings[ $abstract ] ?? null;
@@ -45,12 +45,11 @@ final class ServiceProvider extends PackageServiceProvider
     /**
      * Register any application services.
      */
-    public function packageRegistered() : void
+    public function packageRegistered(): void
     {
         $this->app->singleton(
             AttributesCacheContract::class,
-            fn() => new \Amondar\ClassAttributes\Libraries\AttributesCache()
+            fn() => new Libraries\AttributesCache
         );
     }
-
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Tests\resources\attributes;
 
 use Attribute;
@@ -9,13 +11,12 @@ use Attribute;
  *
  * @author Amondar-SO
  */
-#[Attribute( Attribute::TARGET_METHOD )]
+#[Attribute(Attribute::TARGET_METHOD)]
 class MethodAttribute
 {
-
     /**
      * MethodAttribute constructor.
      */
-    public function __construct(public string $description) { }
+    public function __construct(public string $description) {}
 
 }
