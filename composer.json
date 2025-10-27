@@ -1,6 +1,6 @@
 {
     "name": "amondar-libs/class-attributes",
-    "description": "Allow postman documentation generation for any Laravel project.",
+    "description": "PHP class attributes workflow for package development.",
     "type": "library",
     "version": "1.0.0",
     "authors": [
