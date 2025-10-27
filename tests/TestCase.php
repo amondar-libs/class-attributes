@@ -14,15 +14,6 @@ abstract class TestCase extends CoreTestCase
 {
     use WithFaker;
 
-    protected string $appURL;
-
-    protected function setUp() : void
-    {
-        parent::setUp();
-
-        $this->appURL = $this->app[ 'config' ]->get('app.url');
-    }
-
     protected function getPackageProviders($app)
     {
         return [
