@@ -40,6 +40,9 @@ final class ServiceProvider extends PackageServiceProvider
                 default => $concrete,
             };
         });
+
+        // Run loading for all namespaces registered in `register` sections of service providers.
+        AttributesCache::load();
     }
 
     /**
