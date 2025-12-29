@@ -1,8 +1,5 @@
 {
   "preset": "laravel",
-  "notPath": [
-    "app/Domain/Campaign/Enums/State.php"
-  ],
   "rules": {
     "function_declaration": {
       "closure_fn_spacing": "none"

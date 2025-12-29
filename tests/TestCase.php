@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Tests;
 
-use Amondar\ClassAttributes\ServiceProvider;
 use Closure;
 use Illuminate\Foundation\Testing\WithFaker;
 use JetBrains\PhpStorm\NoReturn;
@@ -17,7 +16,7 @@ abstract class TestCase extends CoreTestCase
     protected function getPackageProviders($app)
     {
         return [
-            ServiceProvider::class,
+
         ];
     }
 

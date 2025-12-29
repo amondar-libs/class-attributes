@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Tests\resources\attributes;
+namespace Tests\_fixtures\attributes;
 
 use Attribute;
 
