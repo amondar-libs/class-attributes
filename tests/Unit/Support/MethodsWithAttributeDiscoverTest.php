@@ -13,6 +13,8 @@ it('should work as expected', function (
         $onClass
     ))->discover($isRepeatable);
 
+    $expected = $expected();
+
     if ($expected instanceof Amondar\ClassAttributes\Results\DiscoveredResult) {
         expect($result)->toEqual($expected);
     } else {
@@ -24,7 +26,7 @@ it('should work as expected', function (
         Tests\_fixtures\ClassWithAttributedMethods::class,
         // Is Repeatable,
         true,
-        new Amondar\ClassAttributes\Results\DiscoveredResult(
+        fn() => new Amondar\ClassAttributes\Results\DiscoveredResult(
             Tests\_fixtures\ClassWithAttributedMethods::class,
             [
                 new Amondar\ClassAttributes\Results\DiscoveredMethod(
@@ -41,7 +43,7 @@ it('should work as expected', function (
         Tests\_fixtures\ClassWithAttributedMethods::class,
         // Is Repeatable,
         false,
-        new Amondar\ClassAttributes\Results\DiscoveredResult(
+        fn() => new Amondar\ClassAttributes\Results\DiscoveredResult(
             Tests\_fixtures\ClassWithAttributedMethods::class,
             [
                 new Amondar\ClassAttributes\Results\DiscoveredMethod(

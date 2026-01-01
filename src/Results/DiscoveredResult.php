@@ -7,22 +7,24 @@ namespace Amondar\ClassAttributes\Results;
 /**
  * Class DiscoveredResult
  *
+ * @template T
+ *
  * @internal
  *
  * @author Amondar-SO
  */
-final readonly class DiscoveredResult
+final readonly class DiscoveredResult extends Discovered
 {
     /**
      * DiscoveredResult constructor.
      *
-     * @param  array<int, object | DiscoveredMethod>  $attributes
+     * @param  array<int, T>  $attributes
      */
     public function __construct(
-        public string $targetClass,
+        string $target,
         public array $attributes,
     ) {
-        //
+        parent::__construct($target);
     }
 
 }

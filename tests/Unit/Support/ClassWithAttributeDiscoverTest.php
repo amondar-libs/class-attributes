@@ -15,6 +15,8 @@ it('should work as expected', function (
         $ascend
     ))->discover($isRepeatable);
 
+    $expected = $expected();
+
     if ($expected instanceof Amondar\ClassAttributes\Results\DiscoveredResult) {
         expect($result)->toEqual($expected);
     } else {
@@ -29,7 +31,7 @@ it('should work as expected', function (
         // Is Repeatable,
         false,
         // Expected
-        new Amondar\ClassAttributes\Results\DiscoveredResult(
+        fn() => new Amondar\ClassAttributes\Results\DiscoveredResult(
             Tests\_fixtures\ClassWithAttribute::class,
             [
                 new Tests\_fixtures\attributes\ClassAttribute([ 'some' => 'data' ]),
@@ -44,7 +46,7 @@ it('should work as expected', function (
         // Is Repeatable,
         false,
         // Expected
-        new Amondar\ClassAttributes\Results\DiscoveredResult(
+        fn() => new Amondar\ClassAttributes\Results\DiscoveredResult(
             Tests\_fixtures\ClassExtendsAttributed::class,
             [
                 new Tests\_fixtures\attributes\ClassAttribute([ 'some' => 'data' ]),
@@ -59,7 +61,7 @@ it('should work as expected', function (
         // Is Repeatable,
         false,
         // Expected
-        null,
+        fn() => null,
     ],
     '`on repeatable class`' => [
         Tests\_fixtures\attributes\ClassAttributeRepeatable::class,
@@ -69,7 +71,7 @@ it('should work as expected', function (
         // Is Repeatable,
         true,
         // Expected
-        new Amondar\ClassAttributes\Results\DiscoveredResult(
+        fn() => new Amondar\ClassAttributes\Results\DiscoveredResult(
             Tests\_fixtures\ClassWithRepeatedAttributes::class,
             [
                 new Tests\_fixtures\attributes\ClassAttributeRepeatable([ 'some' => 'data' ]),
@@ -85,7 +87,7 @@ it('should work as expected', function (
         // Is Repeatable,
         true,
         // Expected
-        new Amondar\ClassAttributes\Results\DiscoveredResult(
+        fn() => new Amondar\ClassAttributes\Results\DiscoveredResult(
             Tests\_fixtures\ClassExtendsRepeatableAttributed::class,
             [
                 new Tests\_fixtures\attributes\ClassAttributeRepeatable([ 'some' => 'data' ]),
@@ -101,6 +103,6 @@ it('should work as expected', function (
         // Is Repeatable,
         true,
         // Expected
-        null,
+        fn() => null,
     ],
 ])->group('support', 'support::class-discover');
