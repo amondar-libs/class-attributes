@@ -7,7 +7,9 @@ namespace Amondar\ClassAttributes\Results;
 /**
  * Class DiscoveredMethod
  *
- * @template T
+ * @template Attribute
+ *
+ * @extends Discovered<string>
  *
  * @internal
  *
@@ -18,7 +20,7 @@ final readonly class DiscoveredMethod extends Discovered
     /**
      * DiscoveredMethod constructor.
      *
-     * @param  array<int, T>  $attributes
+     * @param  array<int, Attribute>  $attributes
      */
     public function __construct(
         string $target,

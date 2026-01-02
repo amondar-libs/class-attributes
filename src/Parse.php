@@ -21,6 +21,9 @@ use Spatie\StructureDiscoverer\Discover;
 /**
  * Class Attribute
  *
+ * @template Class
+ * @template Attribute
+ *
  * @immutable
  *
  * @author Amondar-SO
@@ -28,7 +31,14 @@ use Spatie\StructureDiscoverer\Discover;
 class Parse
 {
     /**
-     * Attribute constructor.
+     * Constructor for initializing the core properties of the class.
+     *
+     *
+     * @param  class-string<Attribute>  $attributeClassName  The fully qualified class name of the attribute to be discovered.
+     * @param  class-string<Class>|null  $onClass  An optional class name to restrict the discovery scope.
+     * @param  bool  $ascend  Whether to ascend through parent classes during the discovery process.
+     * @param  DiscoverCacheDriver|null  $cacheStore  An optional cache driver instance for storing discovery results.
+     * @param  DiscoveredAttribute|null  $discoveredAttribute  An optional pre-discovered attribute instance.
      */
     public function __construct(
         protected readonly string $attributeClassName,
@@ -41,20 +51,14 @@ class Parse
     }
 
     /**
-     * Creates and returns an instance of the class with the given attribute.
+     * Creates a new instance of the class with the specified parameters.
      *
-     * @param  string  $attribute  The name of the attribute class.
-     */
-    public static function attribute(string $attribute): static
-    {
-        return static::make($attribute);
-    }
-
-    /**
-     * Creates a new instance of the class.
-     *
-     * @param  string  $attributeClassName  The name of the attribute
-     *                                      class to instantiate.
+     * @param  class-string<Attribute>  $attributeClassName  The fully qualified class name of the attribute to be used.
+     * @param  class-string<Class>|null  $onClass  The class name on which the attribute should be located, or null if unspecified.
+     * @param  bool  $ascend  Whether to traverse up the class hierarchy during discovery.
+     * @param  DiscoverCacheDriver|null  $cacheStore  The cache driver to be used for caching discovery results, or null if not caching.
+     * @param  DiscoveredAttribute|null  $discoveredAttribute  An optional pre-discovered attribute instance, or null.
+     * @return static<Class, Attribute> A new instance of the class configured with the specified parameters.
      */
     public static function make(
         string $attributeClassName,
@@ -73,7 +77,21 @@ class Parse
     }
 
     /**
-     * Sets the ascend property to true and returns a new instance.
+     * Creates and returns an instance of the class with the given attribute.
+     *
+     * @param  class-string<Attribute>  $attribute  The name of the attribute class.
+     * @return static<Class, Attribute>
+     */
+    public static function attribute(string $attribute): static
+    {
+        return static::make($attribute);
+    }
+
+
+    /**
+     * Sets the ascended property to true and returns a new instance.
+     *
+     * @return static<Class, Attribute>
      */
     public function ascend(): static
     {
@@ -89,7 +107,8 @@ class Parse
     /**
      * Sets the class context for the attribute.
      *
-     * @param  string  $onClass  The class name to set the context on.
+     * @param  class-string<Class>  $onClass  The class name to set the context on.
+     * @return static<Class, Attribute>
      */
     public function on(string $onClass): static
     {
@@ -106,6 +125,7 @@ class Parse
      * Sets a cache store to be used for caching operations.
      *
      * @param  DiscoverCacheDriver|null  $cacheStore  The cache store instance or null if caching is not required.
+     * @return static<Class, Attribute>
      */
     public function withCache(?DiscoverCacheDriver $cacheStore): static
     {
@@ -120,6 +140,8 @@ class Parse
 
     /**
      * Creates a new instance of the current class with caching disabled.
+     *
+     * @return static<Class, Attribute>
      */
     public function withoutCache(): static
     {
@@ -160,9 +182,9 @@ class Parse
     }
 
     /**
-     * Discovers and returns an array of methods associated with the specified attribute class name.
+     * Discovers and returns the result with methods associated with the specified attribute class name.
      *
-     * @return DiscoveredResult<DiscoveredMethod>|null
+     * @return DiscoveredResult<DiscoveredMethod<Attribute>>|null
      *
      * @throws ParseException If no class target is found for the discovery process.
      */
@@ -188,9 +210,9 @@ class Parse
     }
 
     /**
-     * Retrieves and returns an array of discovered attributes.
+     * Retrieves and returns discovered attributes.
      *
-     * @return DiscoveredResult<object>|null
+     * @return DiscoveredResult<Class, Attribute>|null
      *
      * @throws ParseException If no target class is found for discovery.
      */
@@ -219,7 +241,7 @@ class Parse
      * Retrieves and returns all discovered results based on the provided directories.
      *
      * @param  mixed  ...$dirs  A variable number of directories to search for usages.
-     * @return array<int, DiscoveredResult<DiscoveredResult<object>|DiscoveredResult<DiscoveredMethod>>>
+     * @return array<int, DiscoveredResult<string, Attribute|DiscoveredMethod<Attribute>>
      *
      * @throws \Spatie\StructureDiscoverer\Exceptions\NoCacheConfigured
      */
