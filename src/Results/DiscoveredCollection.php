@@ -116,6 +116,19 @@ class DiscoveredCollection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
+     * Get the first item from the collection.
+     *
+     * @template TFirstDefault
+     *
+     * @param  TFirstDefault  $default
+     * @return TValue|TFirstDefault
+     */
+    public function first(mixed $default = null)
+    {
+        return empty($this->items) ? $default : array_first($this->items);
+    }
+
+    /**
      * Determine if an item exists at an offset.
      *
      * @param  int  $key
