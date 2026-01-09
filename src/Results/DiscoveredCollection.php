@@ -13,7 +13,7 @@ use Traversable;
 /**
  * Class DiscoveredCollection
  *
- * @template TValue
+ * @template-covariant TValue
  *
  * @implements ArrayAccess<int, TValue>
  *
