@@ -248,30 +248,28 @@ class Parse
     public function all(...$dirs): DiscoveredCollection
     {
         $all = [];
+p
+        $attribute = $this->discoverAttribute();
 
-        if (count($dirs) > 0) {
-            $attribute = $this->discoverAttribute();
+        foreach ($this->findUsages(...$dirs) as $usage) {
+            $class = $usage->getFcqn();
+            $parse = $this->withoutCache()->on($class);
 
-            foreach ($this->findUsages(...$dirs) as $usage) {
-                $class = $usage->getFcqn();
-                $parse = $this->withoutCache()->on($class);
+            $result = [];
 
-                $result = [];
+            if ($attribute->isOnClass) {
+                $result = array_merge($result, $parse->get()?->attributes ?? []);
+            }
 
-                if ($attribute->isOnClass) {
-                    $result = array_merge($result, $parse->get()?->attributes ?? []);
-                }
+            if ($attribute->isOnMethod) {
+                $result = array_merge($result, $parse->inMethods()?->attributes ?? []);
+            }
 
-                if ($attribute->isOnMethod) {
-                    $result = array_merge($result, $parse->inMethods()?->attributes ?? []);
-                }
-
-                if ($result !== []) {
-                    $all[] = new DiscoveredResult(
-                        $class,
-                        array_values($result)
-                    );
-                }
+            if ($result !== []) {
+                $all[] = new DiscoveredResult(
+                    $class,
+                    array_values($result)
+                );
             }
         }
 
