@@ -245,8 +245,8 @@ class Parse
     /**
      * Retrieves and returns all discovered results based on the provided directories.
      *
-     * @param  mixed  ...$dirs  A variable number of directories to search for usages.
-     * @return Collection<int, DiscoveredTarget<object, Attribute, DiscoveredMethod<Attribute>>
+     * @param  string  ...$dirs  A variable number of directories to search for usages.
+     * @return Collection<int, DiscoveredTarget<object, Attribute>>
      *
      * @throws \Spatie\StructureDiscoverer\Exceptions\NoCacheConfigured
      */
