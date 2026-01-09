@@ -11,8 +11,6 @@ namespace Amondar\ClassAttributes\Results;
  *
  * @extends Discovered<string>
  *
- * @internal
- *
  * @author Amondar-SO
  */
 final readonly class DiscoveredMethod extends Discovered
@@ -28,5 +26,4 @@ final readonly class DiscoveredMethod extends Discovered
     ) {
         parent::__construct($target);
     }
-
 }

@@ -8,6 +8,7 @@ use Amondar\ClassAttributes\Conditions\AttributeDiscoverCondition;
 use Amondar\ClassAttributes\Exceptions\AttributeException;
 use Amondar\ClassAttributes\Exceptions\ParseException;
 use Amondar\ClassAttributes\Results\DiscoveredAttribute;
+use Amondar\ClassAttributes\Results\DiscoveredCollection;
 use Amondar\ClassAttributes\Results\DiscoveredMethod;
 use Amondar\ClassAttributes\Results\DiscoveredResult;
 use Amondar\ClassAttributes\Support\ClassWithAttributeDiscover;
@@ -86,7 +87,6 @@ class Parse
     {
         return static::make($attribute);
     }
-
 
     /**
      * Sets the ascended property to true and returns a new instance.
@@ -241,42 +241,47 @@ class Parse
      * Retrieves and returns all discovered results based on the provided directories.
      *
      * @param  mixed  ...$dirs  A variable number of directories to search for usages.
-     * @return array<int, DiscoveredResult<string, Attribute|DiscoveredMethod<Attribute>>
+     * @return DiscoveredCollection<DiscoveredResult<string, Attribute|DiscoveredMethod<Attribute>>
      *
      * @throws \Spatie\StructureDiscoverer\Exceptions\NoCacheConfigured
      */
-    public function all(...$dirs): array
+    public function all(...$dirs): DiscoveredCollection
     {
         $all = [];
 
-        foreach ($this->findUsages(...$dirs) as $usage) {
-            $class = $usage->getFcqn();
+        if (count($dirs) > 0) {
             $attribute = $this->discoverAttribute();
-            $parse = $this->withoutCache()->on($class);
 
-            $result = [];
+            foreach ($this->findUsages(...$dirs) as $usage) {
+                $class = $usage->getFcqn();
+                $parse = $this->withoutCache()->on($class);
 
-            if ($attribute->isOnClass) {
-                $result = array_merge($result, $parse->get()?->attributes ?? []);
-            }
+                $result = [];
 
-            if ($attribute->isOnMethod) {
-                $result = array_merge($result, $parse->inMethods()?->attributes ?? []);
-            }
+                if ($attribute->isOnClass) {
+                    $result = array_merge($result, $parse->get()?->attributes ?? []);
+                }
 
-            if ($result !== []) {
-                $all[] = new DiscoveredResult(
-                    $class,
-                    array_values($result)
-                );
+                if ($attribute->isOnMethod) {
+                    $result = array_merge($result, $parse->inMethods()?->attributes ?? []);
+                }
+
+                if ($result !== []) {
+                    $all[] = new DiscoveredResult(
+                        $class,
+                        array_values($result)
+                    );
+                }
             }
         }
 
         $cacheKey = $this->getCacheKey(...$dirs);
 
-        return ! $this->cacheStore?->has($cacheKey) ?
+        return new DiscoveredCollection(
+            ! $this->cacheStore?->has($cacheKey) ?
             $this->cache($cacheKey, $all)
-            : $this->cacheStore?->get($cacheKey);
+            : $this->cacheStore?->get($cacheKey)
+        );
     }
 
     /**

@@ -7,6 +7,7 @@ use Amondar\ClassAttributes\Results\DiscoveredMethod;
 use Amondar\ClassAttributes\Results\DiscoveredResult;
 use Tests\_fixtures\attributes\DescriptionAttribute;
 use Tests\_fixtures\ClassExtendsAttributed;
+use Tests\_fixtures\ClassWithAttributedMethods;
 
 $dirs = [
     __DIR__ . '/../_fixtures',
@@ -18,7 +19,7 @@ it('should parse all properly `without ascend`', function () use ($dirs) {
     expect($data)->toHaveCount(3)
         ->and($data[0])->toEqual(
             new DiscoveredResult(
-                Tests\_fixtures\ClassWithAttributedMethods::class,
+                ClassWithAttributedMethods::class,
                 [
                     new DiscoveredMethod(
                         'myMethod',

@@ -12,12 +12,11 @@ namespace Amondar\ClassAttributes\Results;
  *
  * @extends Discovered<Target>
  *
- * @internal
- *
  * @author Amondar-SO
  */
 final readonly class DiscoveredResult extends Discovered
 {
+
     /**
      * DiscoveredResult constructor.
      *
@@ -30,5 +29,4 @@ final readonly class DiscoveredResult extends Discovered
     ) {
         parent::__construct($target);
     }
-
 }
