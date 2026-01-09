@@ -8,13 +8,14 @@ use Amondar\ClassAttributes\Conditions\AttributeDiscoverCondition;
 use Amondar\ClassAttributes\Exceptions\AttributeException;
 use Amondar\ClassAttributes\Exceptions\ParseException;
 use Amondar\ClassAttributes\Results\DiscoveredAttribute;
-use Amondar\ClassAttributes\Results\DiscoveredCollection;
 use Amondar\ClassAttributes\Results\DiscoveredMethod;
 use Amondar\ClassAttributes\Results\DiscoveredResult;
+use Amondar\ClassAttributes\Results\DiscoveredTarget;
 use Amondar\ClassAttributes\Support\ClassWithAttributeDiscover;
 use Amondar\ClassAttributes\Support\MethodsWithAttributeDiscover;
 use Attribute;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use ReflectionClass;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Discover;
@@ -35,7 +36,8 @@ class Parse
      * Constructor for initializing the core properties of the class.
      *
      *
-     * @param  class-string<Attribute>  $attributeClassName  The fully qualified class name of the attribute to be discovered.
+     * @param  class-string<Attribute>  $attributeClassName  The fully qualified class name of the attribute to be
+     *                                                       discovered.
      * @param  class-string<Class>|null  $onClass  An optional class name to restrict the discovery scope.
      * @param  bool  $ascend  Whether to ascend through parent classes during the discovery process.
      * @param  DiscoverCacheDriver|null  $cacheStore  An optional cache driver instance for storing discovery results.
@@ -54,10 +56,13 @@ class Parse
     /**
      * Creates a new instance of the class with the specified parameters.
      *
-     * @param  class-string<Attribute>  $attributeClassName  The fully qualified class name of the attribute to be used.
-     * @param  class-string<Class>|null  $onClass  The class name on which the attribute should be located, or null if unspecified.
+     * @param  class-string<Attribute>  $attributeClassName  The fully qualified class name of the attribute to be
+     *                                                       used.
+     * @param  class-string<Class>|null  $onClass  The class name on which the attribute should be located, or null if
+     *                                             unspecified.
      * @param  bool  $ascend  Whether to traverse up the class hierarchy during discovery.
-     * @param  DiscoverCacheDriver|null  $cacheStore  The cache driver to be used for caching discovery results, or null if not caching.
+     * @param  DiscoverCacheDriver|null  $cacheStore  The cache driver to be used for caching discovery results, or
+     *                                                null if not caching.
      * @param  DiscoveredAttribute|null  $discoveredAttribute  An optional pre-discovered attribute instance, or null.
      * @return static<Class, Attribute> A new instance of the class configured with the specified parameters.
      */
@@ -241,11 +246,11 @@ class Parse
      * Retrieves and returns all discovered results based on the provided directories.
      *
      * @param  mixed  ...$dirs  A variable number of directories to search for usages.
-     * @return DiscoveredCollection<DiscoveredResult<string, Attribute|DiscoveredMethod<Attribute>>
+     * @return Collection<int, DiscoveredTarget<object, Attribute, DiscoveredMethod<Attribute>>
      *
      * @throws \Spatie\StructureDiscoverer\Exceptions\NoCacheConfigured
      */
-    public function all(...$dirs): DiscoveredCollection
+    public function all(...$dirs): Collection
     {
         $all = [];
 
@@ -255,27 +260,31 @@ class Parse
             $class = $usage->getFcqn();
             $parse = $this->withoutCache()->on($class);
 
-            $result = [];
+            $result = [
+                'class'   => [],
+                'methods' => [],
+            ];
 
             if ($attribute->isOnClass) {
-                $result = array_merge($result, $parse->get()?->attributes ?? []);
+                $result['class'] = $parse->get()?->attributes ?? [];
             }
 
             if ($attribute->isOnMethod) {
-                $result = array_merge($result, $parse->inMethods()?->attributes ?? []);
+                $result['methods'] = $parse->inMethods()?->attributes ?? [];
             }
 
-            if ($result !== []) {
-                $all[] = new DiscoveredResult(
-                    $class,
-                    array_values($result)
+            if ($result['class'] !== [] || $result['methods'] !== []) {
+                $all[] = new DiscoveredTarget(
+                    target: $class,
+                    onClass: collect($result['class']),
+                    onMethods: collect($result['methods'])
                 );
             }
         }
 
         $cacheKey = $this->getCacheKey(...$dirs);
 
-        return new DiscoveredCollection(
+        return new Collection(
             ! $this->cacheStore?->has($cacheKey) ?
             $this->cache($cacheKey, $all)
             : $this->cacheStore?->get($cacheKey)
