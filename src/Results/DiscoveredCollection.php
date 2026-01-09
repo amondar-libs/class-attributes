@@ -41,11 +41,13 @@ class DiscoveredCollection implements ArrayAccess, Countable, IteratorAggregate
     /**
      * Filters the items in the collection based on the specified target value.
      *
-     * @param  string  $target  The target value used to filter the collection.
+     * @param  string|array<int, string>  $target  The target value used to filter the collection.
      */
-    public function whereTarget(string $target): static
+    public function whereTarget(string|array $target): static
     {
-        return new static(array_filter($this->items, fn($item) => $item->target === $target));
+        $target = is_array($target) ? $target : [$target];
+
+        return new static(array_filter($this->items, fn($item) => in_array($item->target, $target, true)));
     }
 
     /**
