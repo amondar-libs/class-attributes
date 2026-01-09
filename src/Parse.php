@@ -248,7 +248,7 @@ class Parse
     public function all(...$dirs): DiscoveredCollection
     {
         $all = [];
-p
+
         $attribute = $this->discoverAttribute();
 
         foreach ($this->findUsages(...$dirs) as $usage) {
