@@ -88,7 +88,7 @@ $result = Parse::attribute(ClassAttribute::class)
 // Read method attributes
 $result = Parse::attribute(MethodAttribute::class)
     ->on(Example::class)
-    ->inMethods();
+    ->onMethods();
 
 // $result->attributes contains an array of DiscoveredMethod instances
 foreach ($result->attributes as $discoveredMethod) {

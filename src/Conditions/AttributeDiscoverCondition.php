@@ -5,12 +5,13 @@ declare(strict_types = 1);
 namespace Amondar\ClassAttributes\Conditions;
 
 use Amondar\ClassAttributes\Support\ClassWithAttributeDiscover;
+use Illuminate\Support\Collection;
 use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
+use Spatie\Attributes\Attributes;
 use Spatie\StructureDiscoverer\Data\DiscoveredClass;
 use Spatie\StructureDiscoverer\Data\DiscoveredStructure;
 use Spatie\StructureDiscoverer\DiscoverConditions\DiscoverCondition;
-use Spatie\StructureDiscoverer\Enums\DiscoveredStructureType;
 use Throwable;
 
 /**
@@ -31,11 +32,23 @@ final class AttributeDiscoverCondition extends DiscoverCondition
 
     public function satisfies(DiscoveredStructure $discoveredData): bool
     {
-        if ($discoveredData->getType() !== DiscoveredStructureType::ClassDefinition) {
-            return false;
+        $result = Attributes::has($discoveredData->name, $this->attributeClass);
+
+        if ($result || ! $this->ascend) {
+            return $result;
         }
 
-        return $this->searchOnClassHead($discoveredData) || $this->searchOnClassMethods($discoveredData);
+        $reflectionClass = new ReflectionClass($discoveredData->getFcqn());
+        $reflectionClass = $reflectionClass->getParentClass();
+
+        do {
+            $attributes[$reflectionClass->name] = new Collection(array_map(
+                fn (ReflectionAttribute $reflectionAttribute) => $reflectionAttribute->newInstance(),
+                $reflectionClass->getAttributes($attribute)
+            ));
+        } while ($includeParents && false !== $reflectionClass = $reflectionClass->getParentClass());
+
+        return $includeParents ? new Collection($attributes) : array_first($attributes);
     }
 
     /**

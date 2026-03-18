@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Amondar\ClassAttributes\Results;
 
 /**
- * Class DiscoveredMethod
+ * Class DiscoveredConstant
  *
  * @template Attribute
  *
@@ -13,10 +13,10 @@ namespace Amondar\ClassAttributes\Results;
  *
  * @author Amondar-SO
  */
-final readonly class DiscoveredMethod extends Discovered
+final readonly class DiscoveredConstant extends Discovered
 {
     /**
-     * DiscoveredMethod constructor.
+     * DiscoveredConstant constructor.
      *
      * @param  array<int, Attribute>  $attributes
      */
@@ -25,6 +25,6 @@ final readonly class DiscoveredMethod extends Discovered
         string $parent,
         public array $attributes,
     ) {
-        parent::__construct($target);
+        parent::__construct($target, $parent);
     }
 }

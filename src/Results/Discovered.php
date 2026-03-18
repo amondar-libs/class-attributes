@@ -4,23 +4,27 @@ declare(strict_types = 1);
 
 namespace Amondar\ClassAttributes\Results;
 
+use Amondar\ClassAttributes\Enums\Target;
+
 /**
  * Class Discovered
  *
- * @template T
- *
  * @author Amondar-SO
  */
-abstract readonly class Discovered
+final readonly class Discovered
 {
     /**
      * Discovered constructor.
      *
-     * @param  string|class-string<T>  $target
+     * @param  string|class-string  $name
+     * @param  class-string|null  $parent
      */
-    public function __construct(public string $target)
-    {
-        //
-    }
+    public function __construct(
+        public string $name,
+        public ?string $parent,
+        public object $attribute,
+        public Target $target,
+        public ?string $relatedMethod = null,
+    ) {}
 
 }

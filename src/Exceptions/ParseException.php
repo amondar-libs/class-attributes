@@ -16,7 +16,7 @@ class ParseException extends RuntimeException
     public static function noClassTargetFound(string $methodName): static
     {
         return new static(
-            'No class target found. Please call "->onClass()" method before calling "->' . $methodName . '".'
+            'No class target found. Please call "->on(YourClass::class)" method before calling "->' . $methodName . '".'
         );
     }
 }
