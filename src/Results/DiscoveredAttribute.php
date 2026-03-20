@@ -10,6 +10,8 @@ use ReflectionAttribute;
 use ReflectionClass;
 
 /**
+ * @template Attribute
+ *
  * Class DiscoveredAttribute
  *
  * @author Amondar-SO
@@ -18,6 +20,8 @@ final readonly class DiscoveredAttribute
 {
     /**
      * DiscoveredAttribute constructor.
+     *
+     * @param  class-string<Attribute>  $className
      */
     public function __construct(
         public string $className,

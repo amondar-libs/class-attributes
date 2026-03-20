@@ -7,7 +7,7 @@ use Tests\_fixtures\attributes\TagAttribute;
 
 it('should works as expected', function () {
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onProperties(
+        ->onProperties(
             Tests\_fixtures\ChildDefaultClass::class,
             filter: ReflectionProperty::IS_PUBLIC
         );
@@ -23,7 +23,7 @@ it('should works as expected', function () {
         );
 
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onProperties(
+        ->onProperties(
             Tests\_fixtures\ChildDefaultClass::class,
             filter: ReflectionProperty::IS_PROTECTED
         );
@@ -41,7 +41,7 @@ it('should works as expected', function () {
 
 it('should works as expected with existence check', function () {
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onProperties(
+        ->onProperties(
             class: Tests\_fixtures\ChildDefaultClass::class,
             exist: true,
         );
@@ -49,7 +49,7 @@ it('should works as expected with existence check', function () {
     expect($discovered)->toBeTrue();
 
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onProperties(
+        ->onProperties(
             class: Tests\_fixtures\ChildDefaultClass::class,
             filter: ReflectionProperty::IS_PRIVATE,
             exist: true,
@@ -58,7 +58,7 @@ it('should works as expected with existence check', function () {
     expect($discovered)->toBeFalse();
 
     $discovered = Attribute::for(Tests\_fixtures\attributes\DescriptionAttribute::class)
-                           ->onProperties(
+        ->onProperties(
             class: Tests\_fixtures\ChildDefaultClass::class,
             exist: true,
         );

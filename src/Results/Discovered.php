@@ -9,6 +9,8 @@ use Amondar\ClassAttributes\Enums\Target;
 /**
  * Class Discovered
  *
+ * @template TAttribute of object
+ *
  * @author Amondar-SO
  */
 final readonly class Discovered
@@ -18,6 +20,7 @@ final readonly class Discovered
      *
      * @param  string|class-string  $name
      * @param  class-string|null  $parent
+     * @param  TAttribute  $attribute
      */
     public function __construct(
         public string $name,

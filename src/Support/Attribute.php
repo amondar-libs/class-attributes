@@ -16,27 +16,42 @@ use ReflectionParameter;
 use ReflectionProperty;
 
 /**
+ * @template TAttribute
+ *
  * Class Attribute
  *
  * @author Amondar-SO
  */
 final readonly class Attribute
 {
+    /**
+     * @var DiscoveredAttribute<TAttribute>
+     */
     public DiscoveredAttribute $discovered;
 
     /**
      * Attribute constructor.
+     *
+     * @param  class-string<TAttribute>|DiscoveredAttribute<TAttribute>  $attribute
      */
     public function __construct(string|DiscoveredAttribute $attribute, public bool $ascend = false)
     {
         $this->discovered = is_string($attribute) ? DiscoveredAttribute::from($attribute) : $attribute;
     }
 
+    /**
+     * @param class-string<TAttribute>|DiscoveredAttribute<TAttribute> $attribute
+     *
+     * @return self<TAttribute>
+     */
     public static function for(string|DiscoveredAttribute $attribute, bool $ascend = false): self
     {
         return new self($attribute, $ascend);
     }
 
+    /**
+     * @return self<TAttribute>
+     */
     public function ascend(): self
     {
         return new self($this->discovered, true);
@@ -56,6 +71,9 @@ final readonly class Attribute
                 || $this->onConstants($reflection, exist: true);
     }
 
+    /**
+     * @return array<Discovered<TAttribute>>
+     */
     public function findOn(string|object $class): array
     {
         if ($this->discovered->shouldSkipClassExistence()) {
@@ -76,7 +94,7 @@ final readonly class Attribute
      * @template TExist of bool
      *
      * @param  TExist  $exist
-     * @return (TExist is true ? bool : array<Discovered>)
+     * @return (TExist is true ? bool : array<Discovered<TAttribute>>)
      */
     public function on(string|object $class, bool $exist = false)
     {
@@ -102,7 +120,7 @@ final readonly class Attribute
      * @template TExist of bool
      *
      * @param  TExist  $exist
-     * @return (TExist is true ? bool : array<Discovered>)
+     * @return (TExist is true ? bool : array<Discovered<TAttribute>>)
      */
     public function onConstants(string|object $class, ?int $filter = null, bool $exist = false)
     {
@@ -129,7 +147,7 @@ final readonly class Attribute
      * @template TExist of bool
      *
      * @param  TExist  $exist
-     * @return (TExist is true ? bool : array<Discovered>)
+     * @return (TExist is true ? bool : array<Discovered<TAttribute>>)
      */
     public function onProperties(string|object $class, ?int $filter = null, bool $exist = false)
     {
@@ -156,7 +174,7 @@ final readonly class Attribute
      * @template TExist of bool
      *
      * @param  TExist  $exist
-     * @return (TExist is true ? bool : array<Discovered>)
+     * @return (TExist is true ? bool : array<Discovered<TAttribute>>)
      */
     public function onMethods(string|object $class, ?int $filter = null, bool $includeParameters = false, bool $exist = false)
     {
@@ -190,7 +208,7 @@ final readonly class Attribute
      * @template TExist of bool
      *
      * @param  TExist  $exist
-     * @return (TExist is true ? bool : array<Discovered>)
+     * @return (TExist is true ? bool : array<Discovered<TAttribute>>)
      */
     public function onParameters(string|object $class, ?int $filterMethods = null, bool $exist = false)
     {

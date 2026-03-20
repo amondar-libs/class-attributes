@@ -8,7 +8,6 @@ use Amondar\ClassAttributes\Enums\Target;
 use Amondar\ClassAttributes\Exceptions\ParseException;
 use Amondar\ClassAttributes\Results\Discovered;
 use Amondar\ClassAttributes\Results\DiscoveredAttribute;
-use Attribute;
 use Illuminate\Support\Collection;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Discover;
@@ -16,7 +15,8 @@ use Spatie\StructureDiscoverer\Discover;
 /**
  * Class Attribute
  *
- * @template Class
+ * @template TClass
+ * @template TAttribute
  *
  * @immutable
  *
@@ -24,8 +24,16 @@ use Spatie\StructureDiscoverer\Discover;
  */
 final readonly class Parse
 {
+    /**
+     * @var DiscoveredAttribute<TAttribute>
+     */
     public DiscoveredAttribute $discoveredAttribute;
 
+    /**
+     * @param  class-string<TAttribute>  $attributeClassName
+     * @param  class-string<TClass>|null  $onClass
+     * @param  DiscoveredAttribute<TAttribute>|null  $discoveredAttribute
+     */
     public function __construct(
         public string $attributeClassName,
         public ?string $onClass = null,
@@ -37,16 +45,10 @@ final readonly class Parse
     }
 
     /**
-     * Creates a new instance of the class with the specified parameters.
-     *
-     * @param  class-string<Attribute>  $attributeClassName  The fully qualified class name of the attribute to be
-     *                                                       used.
-     * @param  class-string<Class>|null  $onClass  The class name on which the attribute should be located,
-     *                                             or null if unspecified.
-     * @param  DiscoverCacheDriver|null  $cacheStore  The cache driver to be used for caching discovery results,
-     *                                                or null if not caching.
-     * @param  DiscoveredAttribute|null  $discoveredAttribute  An optional pre-discovered attribute instance, or null.
-     * @return static<Class, Attribute> A new instance of the class configured with the specified parameters.
+     * @param  class-string<TAttribute>  $attributeClassName
+     * @param  class-string<TClass>|null  $onClass
+     * @param  DiscoveredAttribute<TAttribute>|null  $discoveredAttribute
+     * @return self<TClass, TAttribute>
      */
     public static function make(
         string $attributeClassName,
@@ -65,10 +67,8 @@ final readonly class Parse
     }
 
     /**
-     * Creates and returns an instance of the class with the given attribute.
-     *
-     * @param  class-string<Attribute>  $attribute  The name of the attribute class.
-     * @return static<Class, Attribute>
+     * @param  class-string<TAttribute>  $attribute
+     * @return self<TClass, TAttribute>
      */
     public static function attribute(string $attribute): self
     {
@@ -76,10 +76,8 @@ final readonly class Parse
     }
 
     /**
-     * Sets the class context for the attribute.
-     *
-     * @param  class-string<Class>  $onClass  The class name to set the context on.
-     * @return static<Class, Attribute>
+     * @param  class-string<TClass>  $onClass
+     * @return self<TClass, TAttribute>
      */
     public function on(string $onClass): self
     {
@@ -93,9 +91,7 @@ final readonly class Parse
     }
 
     /**
-     * Enables ascending behavior for the current operation.
-     *
-     * @return static<Class, Attribute>
+     * @return self<TClass, TAttribute>
      */
     public function ascend(): self
     {
@@ -109,10 +105,8 @@ final readonly class Parse
     }
 
     /**
-     * Sets a cache store to be used for caching operations.
-     *
-     * @param  DiscoverCacheDriver|null  $cacheStore  The cache store instance or null if caching is not required.
-     * @return static<Class, Attribute>
+     * @param  DiscoverCacheDriver<TAttribute>|null  $cacheStore  The cache store instance or null if caching is not required.
+     * @return self<TClass, TAttribute>
      */
     public function withCache(?DiscoverCacheDriver $cacheStore): self
     {
@@ -126,13 +120,11 @@ final readonly class Parse
     }
 
     /**
-     * Creates a new instance of the current class with caching disabled.
-     *
-     * @return static<Class, Attribute>
+     * @return self<TClass, TAttribute>
      */
     public function withoutCache(): Parse
     {
-        return Parse::make(
+        return self::make(
             $this->attributeClassName,
             onClass: $this->onClass,
             ascend: $this->ascend,
@@ -169,6 +161,9 @@ final readonly class Parse
         return new Collection($discovered);
     }
 
+    /**
+     * @return Collection<int, Discovered<TAttribute>>
+     */
     public function onMethods(): Collection
     {
         if ($this->onClass === null) {
@@ -178,6 +173,9 @@ final readonly class Parse
         return $this->get()->filter(fn(Discovered $discovered) => $discovered->target === Target::method);
     }
 
+    /**
+     * @return Collection<int, Discovered<TAttribute>>
+     */
     public function onClass(): Collection
     {
         if ($this->onClass === null) {
@@ -187,6 +185,9 @@ final readonly class Parse
         return $this->get()->filter(fn(Discovered $discovered) => $discovered->target === Target::onClass);
     }
 
+    /**
+     * @return Collection<int, Discovered<TAttribute>>
+     */
     public function onProperties(): Collection
     {
         if ($this->onClass === null) {
@@ -196,6 +197,9 @@ final readonly class Parse
         return $this->get()->filter(fn(Discovered $discovered) => $discovered->target === Target::property);
     }
 
+    /**
+     * @return Collection<int, Discovered<TAttribute>>
+     */
     public function onConstants(): Collection
     {
         if ($this->onClass === null) {
@@ -205,6 +209,9 @@ final readonly class Parse
         return $this->get()->filter(fn(Discovered $discovered) => $discovered->target === Target::constant);
     }
 
+    /**
+     * @return Collection<int, Discovered<TAttribute>>
+     */
     public function onParameters(): Collection
     {
         if ($this->onClass === null) {
@@ -217,7 +224,7 @@ final readonly class Parse
     /**
      * Retrieves and returns discovered attributes.
      *
-     * @return Collection<int, Discovered>
+     * @return Collection<int, Discovered<TAttribute>>
      *
      * @throws ParseException If no target class is found for discovery.
      */
@@ -243,7 +250,7 @@ final readonly class Parse
      * Retrieves and returns all discovered results based on the provided directories.
      *
      * @param  string  ...$dirs  A variable number of directories to search for usages.
-     * @return Collection<class-string, Collection<string, Collection<int, Discovered>>>
+     * @return Collection<class-string, Collection<string, Collection<int, Discovered<TAttribute>>>>
      *
      * @throws \Spatie\StructureDiscoverer\Exceptions\NoCacheConfigured
      */

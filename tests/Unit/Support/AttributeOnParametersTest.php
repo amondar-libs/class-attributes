@@ -7,7 +7,7 @@ use Tests\_fixtures\attributes\TagAttribute;
 
 it('should works as expected', function () {
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onParameters(
+        ->onParameters(
             Tests\_fixtures\ChildDefaultClass::class,
             filterMethods: ReflectionMethod::IS_PUBLIC
         );
@@ -15,7 +15,7 @@ it('should works as expected', function () {
     expect($discovered)->toBeArray()->toBeEmpty();
 
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onParameters(
+        ->onParameters(
             Tests\_fixtures\ChildDefaultClass::class
         );
 
@@ -32,7 +32,7 @@ it('should works as expected', function () {
 
 it('works as expected with existence check', function () {
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onParameters(
+        ->onParameters(
             class: Tests\_fixtures\ChildDefaultClass::class,
             exist: true,
         );
@@ -40,7 +40,7 @@ it('works as expected with existence check', function () {
     expect($discovered)->toBeTrue();
 
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onParameters(
+        ->onParameters(
             class: Tests\_fixtures\ChildDefaultClass::class,
             filterMethods: ReflectionMethod::IS_PUBLIC,
             exist: true,
@@ -49,7 +49,7 @@ it('works as expected with existence check', function () {
     expect($discovered)->toBeFalse();
 
     $discovered = Attribute::for(Tests\_fixtures\attributes\ClassAttribute::class)
-                           ->onParameters(
+        ->onParameters(
             class: Tests\_fixtures\ChildDefaultClass::class,
             filterMethods: ReflectionMethod::IS_PUBLIC,
             exist: true,

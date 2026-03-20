@@ -9,7 +9,7 @@ use Tests\_fixtures\attributes\TagAttribute;
 
 it('should works as expected', function () {
     $discovered = Attribute::for(TagAttribute::class)
-                           ->on(Tests\_fixtures\ChildDefaultClass::class);
+        ->on(Tests\_fixtures\ChildDefaultClass::class);
 
     expect($discovered)->toBeArray()->toHaveCount(1)
         ->and($discovered[ 0 ])->toEqual(
@@ -22,8 +22,8 @@ it('should works as expected', function () {
         );
 
     $discovered = Attribute::for(DescriptionAttribute::class)
-                           ->ascend()
-                           ->on(Tests\_fixtures\ChildDefaultClass::class);
+        ->ascend()
+        ->on(Tests\_fixtures\ChildDefaultClass::class);
 
     expect($discovered)->toBeArray()->toHaveCount(1)
         ->and($discovered[ 0 ])->toEqual(
@@ -38,7 +38,7 @@ it('should works as expected', function () {
 
 it('should works as expected with existence check', function () {
     $discovered = Attribute::for(TagAttribute::class)
-                           ->on(
+        ->on(
             class: Tests\_fixtures\ChildDefaultClass::class,
             exist: true,
         );
@@ -46,7 +46,7 @@ it('should works as expected with existence check', function () {
     expect($discovered)->toBeTrue();
 
     $discovered = Attribute::for(RepeatableMethodAttribute::class)
-                           ->on(
+        ->on(
             class: Tests\_fixtures\ChildDefaultClass::class,
             exist: true,
         );
@@ -54,7 +54,7 @@ it('should works as expected with existence check', function () {
     expect($discovered)->toBeFalse();
 
     $discovered = Attribute::for(DescriptionAttribute::class)
-                           ->on(
+        ->on(
             class: Tests\_fixtures\ChildDefaultClass::class,
             exist: true,
         );
@@ -62,8 +62,8 @@ it('should works as expected with existence check', function () {
     expect($discovered)->toBeFalse();
 
     $discovered = Attribute::for(DescriptionAttribute::class)
-                           ->ascend()
-                           ->on(
+        ->ascend()
+        ->on(
             class: Tests\_fixtures\ChildDefaultClass::class,
             exist: true,
         );

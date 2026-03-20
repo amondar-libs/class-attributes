@@ -30,7 +30,7 @@ $tagsArray = [
 
 it('works as expected', function () use ($tagsArray): void {
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onMethods(Tests\_fixtures\ChildDefaultClass::class);
+        ->onMethods(Tests\_fixtures\ChildDefaultClass::class);
 
     expect($discovered)->toBeArray()
         ->toHaveCount(3)
@@ -39,7 +39,7 @@ it('works as expected', function () use ($tagsArray): void {
 
 it('works as expected including parameters', function () use ($tagsArray): void {
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onMethods(
+        ->onMethods(
             class: Tests\_fixtures\ChildDefaultClass::class,
             includeParameters: true,
         );
@@ -59,7 +59,7 @@ it('works as expected including parameters', function () use ($tagsArray): void 
 
 it('works as expected with existence check', function () {
     $discovered = Attribute::for(TagAttribute::class)
-                           ->onMethods(
+        ->onMethods(
             class: Tests\_fixtures\ChildDefaultClass::class,
             exist: true,
         );
@@ -67,7 +67,7 @@ it('works as expected with existence check', function () {
     expect($discovered)->toBeTrue();
 
     $discovered = Attribute::for(RequestAttribute::class)
-                           ->onMethods(
+        ->onMethods(
             class: Tests\_fixtures\ChildDefaultClass::class,
             exist: true,
         );
@@ -75,7 +75,7 @@ it('works as expected with existence check', function () {
     expect($discovered)->toBeFalse();
 
     $discovered = Attribute::for(RequestAttribute::class)
-                           ->onMethods(
+        ->onMethods(
             class: Tests\_fixtures\ChildDefaultClass::class,
             includeParameters: true,
             exist: true,
