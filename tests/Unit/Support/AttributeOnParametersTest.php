@@ -22,10 +22,11 @@ it('should works as expected', function () {
     expect($discovered)->toBeArray()->toHaveCount(1)
         ->and($discovered[ 0 ])->toEqual(
             new Amondar\ClassAttributes\Results\Discovered(
-                name: 'support.request',
+                name: 'request',
                 parent: Tests\_fixtures\ChildDefaultClass::class,
                 attribute: new TagAttribute('Request'),
                 target: Amondar\ClassAttributes\Enums\Target::parameter,
+                relatedFunction: 'support'
             )
         );
 });

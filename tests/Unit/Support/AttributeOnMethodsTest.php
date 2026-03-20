@@ -48,10 +48,11 @@ it('works as expected including parameters', function () use ($tagsArray): void 
         ->toHaveCount(4)
         ->and($discovered[ 0 ])->toEqual(
             new Discovered(
-                name: 'support.request',
+                name: 'request',
                 parent: Tests\_fixtures\ChildDefaultClass::class,
                 attribute: new TagAttribute('Request'),
                 target: Amondar\ClassAttributes\Enums\Target::parameter,
+                relatedFunction: 'support'
             )
         )
         ->and(array_slice($discovered, 1))->toMatchArray($tagsArray);

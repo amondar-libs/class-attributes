@@ -303,12 +303,11 @@ final readonly class Attribute
                 target: Target::onClass
             ),
             $target instanceof ReflectionParameter => new Discovered(
-                name: $target->getDeclaringFunction()->getName() . '.' . $target->getName(),
+                name: $target->getName(),
                 parent: $target->getDeclaringClass()?->getName(),
                 attribute: $attribute->newInstance(),
                 target: Target::parameter,
-                relatedFunction: $target->getDeclaringClass() === null ? $target->getDeclaringFunction()->getName() :
-                    null,
+                relatedFunction: $target->getDeclaringFunction()->getName(),
             ),
             default => new Discovered(
                 name: $target->getName(),
