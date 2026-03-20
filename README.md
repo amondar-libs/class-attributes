@@ -20,6 +20,7 @@ composer require amondar-libs/class-attributes
 Contents:
 
 - [Attributes usage](#attributes-usage)
+- [Attribute class usage](#attribute-class-usage)
 - [Batch Discovery](#batch-discovery)
 - [Caching](#caching)
 - [License](#license)
@@ -147,6 +148,79 @@ $results = Parse::attribute(TagAttribute::class)
 
 > That will include attributes from `Example` class and all its parents. 
 > Can be useful for resolving repeatable attributes, for example, when a child can add some new functionality.
+
+---
+
+## Attribute class usage
+
+Under the hood, the `Parse` facade delegates to `Amondar\ClassAttributes\Support\Attribute` — a lower-level, reflection-based class you can use directly for fine-grained control.
+
+### Creating an instance
+
+Use the static `for()` factory, passing either a class-string or a `DiscoveredAttribute` instance:
+
+```php
+use Amondar\ClassAttributes\Support\Attribute;
+
+$attr = Attribute::for(TagAttribute::class);
+```
+
+### Checking if an attribute exists
+
+The `existsOn()` method returns `true` if the attribute is present anywhere on the class (class-level, methods, properties, constants, or parameters):
+
+```php
+$attr->existsOn(Example::class); // true / false
+```
+
+### Finding all attribute usages on a class
+
+`findOn()` returns an array of `Discovered` objects for every occurrence of the attribute on the given class:
+
+```php
+$results = $attr->findOn(Example::class);
+// array<Discovered>
+```
+
+### Targeted lookups
+
+Each method accepts a class-string, an object, or a `ReflectionClass` instance. They return an array of `Discovered` objects (or `bool` when the `$exist` flag is `true`):
+
+```php
+// Class-level attributes only
+$attr->on(Example::class);
+
+// Method attributes only (optionally include parameter attributes)
+$attr->onMethods(Example::class, includeParameters: true);
+
+// Property attributes only
+$attr->onProperties(Example::class);
+
+// Constant attributes only
+$attr->onConstants(Example::class);
+
+// Parameter attributes only
+$attr->onParameters(Example::class);
+```
+
+You can also pass a visibility filter using PHP's `ReflectionMethod`/`ReflectionProperty` filter constants:
+
+```php
+$attr->onMethods(Example::class, filter: ReflectionMethod::IS_PUBLIC);
+$attr->onProperties(Example::class, filter: ReflectionProperty::IS_PUBLIC);
+$attr->onConstants(Example::class, filter: ReflectionClassConstant::IS_PUBLIC);
+```
+
+### Inheritance lookup
+
+Just like the `Parse` helper, you can include parent class attributes with `ascend()`:
+
+```php
+$attr = Attribute::for(TagAttribute::class)->ascend();
+
+$results = $attr->findOn(ChildOfExample::class);
+// Includes attributes from ChildOfExample and all its parents
+```
 
 ---
 
