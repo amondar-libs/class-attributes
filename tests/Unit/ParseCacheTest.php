@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 use Amondar\ClassAttributes\Enums\Target;
-use Amondar\ClassAttributes\Laravel\AttributesCacheDriver;
+use Amondar\ClassAttributes\Laravel\AttributeCacheDriver;
 use Amondar\ClassAttributes\Parse;
 use Amondar\ClassAttributes\Results\Discovered;
 use Illuminate\Cache\Events\CacheHit;
@@ -13,12 +13,13 @@ use Illuminate\Cache\Events\RetrievingKey;
 use Tests\_fixtures\attributes\ClassAttribute;
 use Tests\_fixtures\attributes\DescriptionAttribute;
 use Tests\_fixtures\attributes\MethodAttribute;
-use Tests\_fixtures\ClassWithAttribute;
-use Tests\_fixtures\ClassWithAttributedMethods;
+use Tests\_fixtures\DefaultClass;
 
 $dirs = [
     __DIR__ . '/../_fixtures',
 ];
+
+afterEach(fn() => (new AttributeCacheDriver('laravel', 'redis'))->flush());
 
 it('should cache usage results', function () use ($dirs) {
     Event::fake([
@@ -27,7 +28,7 @@ it('should cache usage results', function () use ($dirs) {
     ]);
 
     $parser = Parse::attribute(ClassAttribute::class)
-        ->withCache(new AttributesCacheDriver('laravel', 'redis'));
+        ->withCache(new AttributeCacheDriver('laravel', 'redis'));
 
     $parser->findUsages(...$dirs);
 
@@ -37,9 +38,7 @@ it('should cache usage results', function () use ($dirs) {
 
         return true;
     });
-})
-    ->group('parse', 'parse::cache')
-    ->after(fn() => cache()->store('redis')->tags(AttributesCacheDriver::TAGS)->flush());
+});
 
 it('should cache class attributes results', function () {
     Event::fake([
@@ -48,8 +47,8 @@ it('should cache class attributes results', function () {
     ]);
 
     $parser = Parse::attribute(ClassAttribute::class)
-        ->on(ClassWithAttribute::class)
-        ->withCache(new AttributesCacheDriver('laravel', 'redis'));
+        ->on(DefaultClass::class)
+        ->withCache(new AttributeCacheDriver('laravel', 'redis'));
 
     $key = $parser->getCacheKey();
 
@@ -61,9 +60,7 @@ it('should cache class attributes results', function () {
 
         return true;
     });
-})
-    ->group('parse', 'parse::cache')
-    ->after(fn() => cache()->store('redis')->tags(AttributesCacheDriver::TAGS)->flush());
+});
 
 it('should cache method attributes results', function () {
     Event::fake([
@@ -72,8 +69,8 @@ it('should cache method attributes results', function () {
     ]);
 
     $parser = Parse::attribute(MethodAttribute::class)
-        ->on(ClassWithAttributedMethods::class)
-        ->withCache(new AttributesCacheDriver('laravel'));
+        ->on(DefaultClass::class)
+        ->withCache(new AttributeCacheDriver('laravel'));
 
     $key = $parser->getCacheKey();
 
@@ -85,7 +82,7 @@ it('should cache method attributes results', function () {
 
         return true;
     });
-})->group('parse', 'parse::cache');
+});
 
 it('should cache all results', function () use ($dirs) {
     Event::fake([
@@ -94,13 +91,13 @@ it('should cache all results', function () use ($dirs) {
     ]);
 
     $parser = Parse::attribute(DescriptionAttribute::class)
-        ->withCache(new AttributesCacheDriver('laravel'));
+        ->withCache(new AttributeCacheDriver('laravel'));
 
     $parser->in(...$dirs);
 
-    Event::assertDispatchedTimes(CacheMissed::class, 3);
-    Event::assertDispatchedTimes(KeyWritten::class, 3);
-})->group('parse', 'parse::cache');
+    Event::assertDispatchedTimes(CacheMissed::class, 4);
+    Event::assertDispatchedTimes(KeyWritten::class, 4);
+});
 
 it('should read from cache', function (
     $cacheIt,
@@ -123,12 +120,12 @@ it('should read from cache', function (
 })
     ->with([
         '`usage`'            => [
-            fn() => (new AttributesCacheDriver('laravel'))
+            fn() => (new AttributeCacheDriver('laravel'))
                 ->put(
                     Parse::attribute(ClassAttribute::class)->getCacheKey(...$dirs),
                     [
                         new Discovered(
-                            name: ClassWithAttribute::class,
+                            name: DefaultClass::class,
                             parent: null,
                             attribute: new ClassAttribute([ 'some' => 'data' ]),
                             target: Target::onClass
@@ -136,16 +133,16 @@ it('should read from cache', function (
                     ]
                 ),
             fn() => Parse::attribute(ClassAttribute::class)
-                ->withCache(new AttributesCacheDriver('laravel'))
+                ->withCache(new AttributeCacheDriver('laravel'))
                 ->findUsages(...$dirs),
         ],
         '`based on class`'   => [
-            fn() => (new AttributesCacheDriver('laravel'))
+            fn() => (new AttributeCacheDriver('laravel'))
                 ->put(
-                    Parse::attribute(ClassAttribute::class)->on(ClassWithAttribute::class)->getCacheKey(),
+                    Parse::attribute(ClassAttribute::class)->on(DefaultClass::class)->getCacheKey(),
                     [
                         new Discovered(
-                            name: ClassWithAttribute::class,
+                            name: DefaultClass::class,
                             parent: null,
                             attribute: new ClassAttribute([ 'some' => 'data' ]),
                             target: Target::onClass
@@ -153,56 +150,43 @@ it('should read from cache', function (
                     ]
                 ),
             fn() => Parse::attribute(ClassAttribute::class)
-                ->on(ClassWithAttribute::class)
-                ->withCache(new AttributesCacheDriver('laravel'))
+                ->on(DefaultClass::class)
+                ->withCache(new AttributeCacheDriver('laravel'))
                 ->get(),
         ],
-        //        '`based on methods`' => [
-        //            fn() => (new AttributesCacheDriver('laravel'))
-        //                ->put(Parse::attribute(ClassAttribute::class)->on(ClassWithAttribute::class)->getCacheKey(), [
-        //                    new Amondar\ClassAttributes\Results\DiscoveredResult('asd', []),
-        //                ]),
-        //            fn() => Parse::attribute(ClassAttribute::class)
-        //                ->on(ClassWithAttribute::class)
-        //                ->withCache(new AttributesCacheDriver('laravel'))
-        //                ->onMethods(),
-        //        ],
-        //        '`all`' => [
-        //            fn() => (new AttributesCacheDriver('laravel'))
-        //                ->put(
-        //                    Parse::attribute(ClassAttribute::class)
-        //                        ->on(ClassWithAttribute::class)
-        //                        ->getCacheKey(...$dirs),
-        //                    []
-        //                ),
-        //            fn() => Parse::attribute(DescriptionAttribute::class)
-        //                ->withCache(new AttributesCacheDriver('laravel'))
-        //                ->all(...$dirs),
-        //        ],
-    ])
-    ->group('parse', 'parse::cache');
-//
-// it('should return null on empty cache', function (
-//    $getParse,
-//    $parseIt
-// ) {
-//    $parse = $getParse();
-//
-//    (new AttributesCacheDriver('laravel'))
-//        ->put($parse->getCacheKey(), []);
-//
-//    expect($parseIt($parse))->toBeNull();
-// })->with([
-//    '`based on class`'   => [
-//        fn() => Parse::attribute(ClassAttribute::class)
-//            ->withCache(new AttributesCacheDriver('laravel'))
-//            ->on(ClassWithAttribute::class),
-//        fn(Parse $parse) => $parse->get(),
-//    ],
-//    '`based on methods`' => [
-//        fn() => Parse::attribute(MethodAttribute::class)
-//            ->withCache(new AttributesCacheDriver('laravel'))
-//            ->on(ClassWithAttributedMethods::class),
-//        fn(Parse $parse) => $parse->onMethods(),
-//    ],
-// ])->group('parse', 'parse::cache');
+        '`all`' => [
+            fn() => (new AttributeCacheDriver('laravel'))
+                ->put(
+                    Parse::attribute(DescriptionAttribute::class)->getCacheKey(...$dirs),
+                    [
+                        DefaultClass::class => [
+                            'class' => [
+                                new Discovered(
+                                    name: DefaultClass::class,
+                                    parent: null,
+                                    attribute: new DescriptionAttribute('Class with attributed methods'),
+                                    target: Target::onClass
+                                ),
+                            ],
+                            'method' => [
+                                new Discovered(
+                                    name: 'myMethod',
+                                    parent: DefaultClass::class,
+                                    attribute: new DescriptionAttribute('My method'),
+                                    target: Target::method,
+                                ),
+                                new Discovered(
+                                    name: 'postsList',
+                                    parent: DefaultClass::class,
+                                    attribute: new DescriptionAttribute('Posts list method'),
+                                    target: Target::method,
+                                ),
+                            ],
+                        ],
+                    ]
+                ),
+            fn() => Parse::attribute(DescriptionAttribute::class)
+                ->withCache(new AttributeCacheDriver('laravel'))
+                ->in(...$dirs),
+        ],
+    ]);

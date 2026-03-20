@@ -5,18 +5,17 @@ declare(strict_types = 1);
 namespace Amondar\ClassAttributes\Laravel;
 
 use Illuminate\Contracts\Cache\Repository;
+use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 
 /**
- * Class DiscoverCacheDriver
+ * Class AttributeCacheDriver
  *
  * @author Amondar-SO
  */
-class AttributesCacheDriver implements \Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver
+class AttributeCacheDriver implements DiscoverCacheDriver
 {
-    public const TAGS = ['class-attributes'];
-
     public function __construct(
-        public ?string $prefix = null,
+        public string $name,
         public ?string $store = null,
     ) {}
 
@@ -42,19 +41,22 @@ class AttributesCacheDriver implements \Spatie\StructureDiscoverer\Cache\Discove
         $this->resolveCacheRepository()->forget($this->resolveCacheKey($id));
     }
 
+    public function flush(): void
+    {
+        $this->resolveCacheRepository()->flush();
+    }
+
     private function resolveCacheRepository(): Repository
     {
         $store = cache()->store($this->store);
 
         return $store->supportsTags()
-            ? $store->tags(static::TAGS)
+            ? $store->tags([$this->name])
             : $store;
     }
 
     private function resolveCacheKey(string $id): string
     {
-        return $this->prefix
-            ? "{$this->prefix}-discoverer-cache-{$id}"
-            : "discoverer-cache-{$id}";
+        return "{$this->name}-parsed-attributes-{$id}";
     }
 }

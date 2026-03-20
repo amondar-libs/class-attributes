@@ -5,15 +5,11 @@ declare(strict_types = 1);
 namespace Amondar\ClassAttributes;
 
 use Amondar\ClassAttributes\Enums\Target;
-use Amondar\ClassAttributes\Exceptions\AttributeException;
 use Amondar\ClassAttributes\Exceptions\ParseException;
 use Amondar\ClassAttributes\Results\Discovered;
 use Amondar\ClassAttributes\Results\DiscoveredAttribute;
 use Attribute;
 use Illuminate\Support\Collection;
-use ReflectionClass;
-use ReflectionParameter;
-use Spatie\Attributes\Attributes;
 use Spatie\StructureDiscoverer\Cache\DiscoverCacheDriver;
 use Spatie\StructureDiscoverer\Discover;
 
@@ -31,44 +27,13 @@ final readonly class Parse
     public DiscoveredAttribute $discoveredAttribute;
 
     public function __construct(
-        private string $attributeClassName,
-        private ?string $onClass = null,
-        private ?DiscoverCacheDriver $cacheStore = null,
+        public string $attributeClassName,
+        public ?string $onClass = null,
+        public bool $ascend = false,
+        public ?DiscoverCacheDriver $cacheStore = null,
         ?DiscoveredAttribute $discoveredAttribute = null,
     ) {
-        if ($discoveredAttribute === null) {
-            if ( ! class_exists($this->attributeClassName)) {
-                throw AttributeException::noAttributeClassFound(
-                    $this->attributeClassName
-                );
-            }
-
-            $ref = new ReflectionClass($this->attributeClassName);
-
-            // The "Attribute" meta-attribute is what defines TARGET_* and IS_REPEATABLE
-            $attrs = $ref->getAttributes(Attribute::class);
-
-            if ($attrs === []) {
-                // Not an attribute class at all (no #[Attribute] declared)
-                throw AttributeException::classIsNotAnAttribute($this->attributeClassName);
-            }
-
-            /** @var Attribute $meta */
-            $meta = $attrs[ 0 ]->newInstance();
-
-            $this->discoveredAttribute = new DiscoveredAttribute(
-                isOnClass: (bool) ($meta->flags & Attribute::TARGET_CLASS),
-                isOnMethod: (bool) ($meta->flags & Attribute::TARGET_METHOD),
-                isOnFunction: (bool) ($meta->flags & Attribute::TARGET_FUNCTION),
-                isOnProperty: (bool) ($meta->flags & Attribute::TARGET_PROPERTY),
-                isOnParameter: (bool) ($meta->flags & Attribute::TARGET_PARAMETER),
-                isOnConstant: PHP_VERSION_ID >= 80500 && ($meta->flags & Attribute::TARGET_CONSTANT),
-                isOnClassConstant: (bool) ($meta->flags & Attribute::TARGET_CLASS_CONSTANT),
-                isRepeatable: (bool) ($meta->flags & Attribute::IS_REPEATABLE)
-            );
-        } else {
-            $this->discoveredAttribute = $discoveredAttribute;
-        }
+        $this->discoveredAttribute = $discoveredAttribute ?? DiscoveredAttribute::from($this->attributeClassName);
     }
 
     /**
@@ -76,22 +41,24 @@ final readonly class Parse
      *
      * @param  class-string<Attribute>  $attributeClassName  The fully qualified class name of the attribute to be
      *                                                       used.
-     * @param  class-string<Class>|null  $onClass  The class name on which the attribute should be located, or null if
-     *                                             unspecified.
-     * @param  DiscoverCacheDriver|null  $cacheStore  The cache driver to be used for caching discovery results, or
-     *                                                null if not caching.
+     * @param  class-string<Class>|null  $onClass  The class name on which the attribute should be located,
+     *                                             or null if unspecified.
+     * @param  DiscoverCacheDriver|null  $cacheStore  The cache driver to be used for caching discovery results,
+     *                                                or null if not caching.
      * @param  DiscoveredAttribute|null  $discoveredAttribute  An optional pre-discovered attribute instance, or null.
      * @return static<Class, Attribute> A new instance of the class configured with the specified parameters.
      */
     public static function make(
         string $attributeClassName,
         ?string $onClass = null,
+        bool $ascend = false,
         ?DiscoverCacheDriver $cacheStore = null,
         ?DiscoveredAttribute $discoveredAttribute = null
-    ): Parse {
-        return new Parse(
+    ): self {
+        return new self(
             $attributeClassName,
             onClass: $onClass,
+            ascend: $ascend,
             cacheStore: $cacheStore,
             discoveredAttribute: $discoveredAttribute
         );
@@ -103,9 +70,9 @@ final readonly class Parse
      * @param  class-string<Attribute>  $attribute  The name of the attribute class.
      * @return static<Class, Attribute>
      */
-    public static function attribute(string $attribute): Parse
+    public static function attribute(string $attribute): self
     {
-        return Parse::make($attribute);
+        return self::make($attribute);
     }
 
     /**
@@ -114,11 +81,28 @@ final readonly class Parse
      * @param  class-string<Class>  $onClass  The class name to set the context on.
      * @return static<Class, Attribute>
      */
-    public function on(string $onClass): Parse
+    public function on(string $onClass): self
     {
-        return Parse::make(
+        return self::make(
             $this->attributeClassName,
             onClass: $onClass,
+            ascend: $this->ascend,
+            cacheStore: $this->cacheStore,
+            discoveredAttribute: $this->discoveredAttribute
+        );
+    }
+
+    /**
+     * Enables ascending behavior for the current operation.
+     *
+     * @return static<Class, Attribute>
+     */
+    public function ascend(): self
+    {
+        return self::make(
+            $this->attributeClassName,
+            onClass: $this->onClass,
+            ascend: true,
             cacheStore: $this->cacheStore,
             discoveredAttribute: $this->discoveredAttribute
         );
@@ -130,11 +114,12 @@ final readonly class Parse
      * @param  DiscoverCacheDriver|null  $cacheStore  The cache store instance or null if caching is not required.
      * @return static<Class, Attribute>
      */
-    public function withCache(?DiscoverCacheDriver $cacheStore): Parse
+    public function withCache(?DiscoverCacheDriver $cacheStore): self
     {
-        return Parse::make(
+        return self::make(
             $this->attributeClassName,
             onClass: $this->onClass,
+            ascend: $this->ascend,
             cacheStore: $cacheStore,
             discoveredAttribute: $this->discoveredAttribute
         );
@@ -150,6 +135,7 @@ final readonly class Parse
         return Parse::make(
             $this->attributeClassName,
             onClass: $this->onClass,
+            ascend: $this->ascend,
             discoveredAttribute: $this->discoveredAttribute
         );
     }
@@ -158,11 +144,11 @@ final readonly class Parse
      * Searches for and returns usages based on the specified directories.
      *
      * @param  string  ...$directories  A variable number of directories to search for usages.
-     * @return array<int, \Spatie\StructureDiscoverer\Data\DiscoveredClass>
+     * @return Collection<int, \Spatie\StructureDiscoverer\Data\DiscoveredClass>
      *
      * @throws \Spatie\StructureDiscoverer\Exceptions\NoCacheConfigured
      */
-    public function findUsages(...$directories): array
+    public function findUsages(...$directories): Collection
     {
         $discover = Discover::in(...$directories)->classes();
 
@@ -173,10 +159,14 @@ final readonly class Parse
             );
         }
 
-        return $discover
-            ->custom(fn($d) => Attributes::has($d->getFcqn(), $this->attributeClassName))
+        $parser = $this->makeParser();
+
+        $discovered = $discover
+            ->custom(fn($d) => $parser->existsOn($d->getFcqn()))
             ->full()
             ->get();
+
+        return new Collection($discovered);
     }
 
     public function onMethods(): Collection
@@ -215,7 +205,7 @@ final readonly class Parse
         return $this->get()->filter(fn(Discovered $discovered) => $discovered->target === Target::constant);
     }
 
-    public function onParameters()
+    public function onParameters(): Collection
     {
         if ($this->onClass === null) {
             throw ParseException::noClassTargetFound('onConstants');
@@ -240,35 +230,10 @@ final readonly class Parse
         $cacheKey = $this->getCacheKey();
 
         if ( ! $this->cacheStore?->has($cacheKey)) {
-            $parsed = new Collection;
-
-            foreach (Attributes::find($this->onClass, $this->attributeClassName) as $result) {
-                $target = $result->target;
-
-                $parsed->push(match (true) {
-                    $target instanceof ReflectionClass => new Discovered(
-                        name: $this->onClass,
-                        parent: null,
-                        attribute: $result->attribute,
-                        target: Target::onClass
-                    ),
-                    $target instanceof ReflectionParameter => new Discovered(
-                        name: $target->getName(),
-                        parent: $target->getDeclaringClass() ? $this->onClass : null,
-                        attribute: $result->attribute,
-                        target: Target::parameter,
-                        relatedMethod: $target->getDeclaringFunction()->getName(),
-                    ),
-                    default => new Discovered(
-                        name: $target->getName(),
-                        parent: $this->onClass,
-                        attribute: $result->attribute,
-                        target: Target::detectFromReflection($target),
-                    )
-                });
-            }
-
-            return $this->cache($cacheKey, $parsed);
+            return $this->cache(
+                $cacheKey,
+                new Collection($this->makeParser()->findOn($this->onClass))
+            );
         }
 
         return $this->restoreFromCache($cacheKey);
@@ -278,7 +243,7 @@ final readonly class Parse
      * Retrieves and returns all discovered results based on the provided directories.
      *
      * @param  string  ...$dirs  A variable number of directories to search for usages.
-     * @return Collection<class-string, Collection<string, Discovered>>
+     * @return Collection<class-string, Collection<string, Collection<int, Discovered>>>
      *
      * @throws \Spatie\StructureDiscoverer\Exceptions\NoCacheConfigured
      */
@@ -293,7 +258,7 @@ final readonly class Parse
                 $class = $usage->getFcqn();
                 $parse = $this->on($class);
 
-                $all->put($this->onClass, $parse->get()->groupBy(fn(Discovered $d) => $d->target->value));
+                $all->put($class, new Collection($parse->get()->groupBy('target')));
             }
 
             return $this->cache($cacheKey, $all);
@@ -302,7 +267,7 @@ final readonly class Parse
         return $this->restoreFromCache($cacheKey);
     }
 
-    public function getCacheKey(...$directories): string
+    public function getCacheKey(string ...$directories): string
     {
         $key = hash('xxh3', $this->attributeClassName) . '::';
 
@@ -330,5 +295,12 @@ final readonly class Parse
     private function restoreFromCache(string $key): Collection
     {
         return new Collection($this->cacheStore?->get($key) ?? []);
+    }
+
+    private function makeParser(): Support\Attribute
+    {
+        $parser = Support\Attribute::for($this->discoveredAttribute);
+
+        return $this->ascend ? $parser->ascend() : $parser;
     }
 }

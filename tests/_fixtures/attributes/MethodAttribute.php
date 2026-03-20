@@ -6,11 +6,7 @@ namespace Tests\_fixtures\attributes;
 
 use Attribute;
 
-/**
- * Class MethodAttribute
- *
- * @author Amondar-SO
- */
+
 #[Attribute(Attribute::TARGET_METHOD)]
 class MethodAttribute
 {

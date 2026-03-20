@@ -6,8 +6,13 @@ namespace Tests\_fixtures\attributes;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class DescriptionAttribute
+/**
+ * Class DescriptionAttribute
+ *
+ * @author Amondar-SO
+ */
+#[Attribute(Attribute::TARGET_ALL)]
+class TagAttribute
 {
     /**
      * DescriptionAttribute constructor.

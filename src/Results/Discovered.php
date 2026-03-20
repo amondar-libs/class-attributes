@@ -24,7 +24,7 @@ final readonly class Discovered
         public ?string $parent,
         public object $attribute,
         public Target $target,
-        public ?string $relatedMethod = null,
+        public ?string $relatedFunction = null,
     ) {}
 
 }

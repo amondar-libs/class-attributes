@@ -10,10 +10,9 @@
     }
   ],
   "require": {
-    "php": "^8.4",
+    "php": "^8.2",
     "spatie/php-structure-discoverer": "2.3.3",
-    "illuminate/collections": "^10|^11|^12.0",
-    "spatie/php-attribute-reader": "^1.1"
+    "illuminate/collections": "^10|^11|^12.0|^13.0"
   },
   "require-dev": {
     "orchestra/testbench": "^10.8",

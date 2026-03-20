@@ -6,8 +6,8 @@ namespace Tests\_fixtures\attributes;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class DescriptionAttribute
+#[Attribute(Attribute::TARGET_PARAMETER)]
+class RequestAttribute
 {
     /**
      * DescriptionAttribute constructor.
