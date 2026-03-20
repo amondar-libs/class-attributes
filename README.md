@@ -6,8 +6,9 @@ efficient attribute discovery.
 
 What you get:
 
-- Simple fluent API to read class and method attributes
+- Simple fluent API to read class, method, property, constant, and parameter attributes
 - Support for repeatable attributes and inheritance lookups
+- Filtering helpers: `onClass()`, `onMethods()`, `onProperties()`, `onConstants()`, `onParameters()`
 - Optional caching support for performance in production
 
 Contents:
@@ -38,14 +39,14 @@ class ClassAttribute
     public function __construct(public array $someData) {}
 }
 
-#[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-class ClassAttributeRepeatable
-{
-    public function __construct(public array $someData) {}
-}
-
 #[Attribute(Attribute::TARGET_METHOD)]
 class MethodAttribute
+{
+    public function __construct(public string $description) {}
+}
+
+#[Attribute(Attribute::TARGET_ALL)]
+class TagAttribute
 {
     public function __construct(public string $description) {}
 }
@@ -57,6 +58,12 @@ class MethodAttribute
 #[ClassAttribute(['someData' => 'someValue'])]
 class Example
 {
+    #[TagAttribute('MyConst')]
+    public const MY_CONST = 'my-const';
+
+    #[TagAttribute('isOk')]
+    public bool $isOk = true;
+
     #[MethodAttribute('First method description')]
     public function firstMethod() {}
 
@@ -67,35 +74,73 @@ class Example
 
 ### 3) Read attributes: Parse helper
 
+The `get()` method returns a `Collection` of `Discovered` objects. Each `Discovered` instance contains:
+
+- `name` — the name of the target (class name, method name, property name, etc.)
+- `parent` — the parent/declaring class name (FCQN)
+- `attribute` — the attribute instance
+- `target` — a `Target` enum case (`onClass`, `method`, `property`, `constant`, `parameter`)
+
 ```php
 use Amondar\ClassAttributes\Parse;
 
-// Get class attributes
-$result = Parse::attribute(ClassAttribute::class)
+// Get all discovered attributes on a class (class-level, methods, properties, constants)
+$results = Parse::attribute(TagAttribute::class)
     ->on(Example::class)
     ->get();
 
-// $result is an instance of DiscoveredResult
-// $result->attributes contains an array of ClassAttribute instances
-$attribute = $result->attributes[0] ?? null;
+// $results is a Collection of Discovered instances
+foreach ($results as $discovered) {
+    echo $discovered->name;              // e.g. 'MY_CONST', 'isOk', 'firstMethod'
+    echo $discovered->target->value;     // e.g. 'constant', 'property', 'method'
+    echo $discovered->attribute->description; // e.g. 'MyConst'
+}
+```
 
-// Include parents in search (useful for inheritance)
-$result = Parse::attribute(ClassAttribute::class)
-    ->on(ChildOfExample::class)
-    ->ascend()
-    ->get();
+### 4) Filter by target
 
-// Read method attributes
-$result = Parse::attribute(MethodAttribute::class)
+Use dedicated filter methods to narrow results to a specific target type:
+
+```php
+// Only class-level attributes
+$classAttrs = Parse::attribute(ClassAttribute::class)
+    ->on(Example::class)
+    ->onClass();
+
+// Only method attributes
+$methodAttrs = Parse::attribute(MethodAttribute::class)
     ->on(Example::class)
     ->onMethods();
 
-// $result->attributes contains an array of DiscoveredMethod instances
-foreach ($result->attributes as $discoveredMethod) {
-    echo $discoveredMethod->target; // method name, e.g. 'firstMethod'
-    $attr = $discoveredMethod->attributes[0]; // MethodAttribute instance
-}
+// Only property attributes
+$propAttrs = Parse::attribute(TagAttribute::class)
+    ->on(Example::class)
+    ->onProperties();
+
+// Only constant attributes
+$constAttrs = Parse::attribute(TagAttribute::class)
+    ->on(Example::class)
+    ->onConstants();
+
+// Only parameter attributes
+$paramAttrs = Parse::attribute(RequestAttribute::class)
+    ->on(Example::class)
+    ->onParameters();
 ```
+
+### 5) Inheritance lookup
+
+Include parent class attributes in the search using `ascend()`:
+
+```php
+$results = Parse::attribute(TagAttribute::class)
+    ->on(ChildOfExample::class)
+    ->ascend()
+    ->get();
+```
+
+> That will include attributes from `Example` class and all its parents. 
+> Can be useful for resolving repeatable attributes, for example, when a child can add some new functionality.
 
 ---
 
@@ -109,12 +154,12 @@ use Amondar\ClassAttributes\Parse;
 $parser = Parse::attribute(ClassAttribute::class);
 
 // Find all classes that use this attribute
-$usages = $parser->findUsages(__DIR__ . '/src'); 
-// Returns array of \Spatie\StructureDiscoverer\Data\DiscoveredClass
+$usages = $parser->findUsages(__DIR__ . '/src');
+// Returns Collection of \Spatie\StructureDiscoverer\Data\DiscoveredClass
 
-// Discover and parse all attributes (both class and methods) for classes in directories
-$all = $parser->all(__DIR__ . '/src', __DIR__ . '/tests');
-// Returns array of DiscoveredResult
+// Discover and parse all attributes for classes in directories
+$all = $parser->in(__DIR__ . '/src', __DIR__ . '/tests');
+// Returns Collection<class-string, Collection<string, Collection<int, Discovered>>>
 ```
 
 ---
@@ -139,7 +184,7 @@ $result = $parser->on(Example::class)->get();
 
 > **Note:** `LaravelDiscoverCacheDriver` is just one example. You can use any driver supported
 > by [spatie/php-structure-discoverer official docs](https://github.com/spatie/php-structure-discoverer#caching).
-
+> Current package ships with `Amondar\\ClassAttributes\\Laravel\\AttributeCacheDriver` out of the box.
 ---
 
 ## License
