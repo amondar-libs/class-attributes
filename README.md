@@ -11,6 +11,12 @@ What you get:
 - Filtering helpers: `onClass()`, `onMethods()`, `onProperties()`, `onConstants()`, `onParameters()`
 - Optional caching support for performance in production
 
+Installation:
+
+```bash
+composer require amondar-libs/class-attributes
+```
+
 Contents:
 
 - [Attributes usage](#attributes-usage)
